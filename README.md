@@ -23,7 +23,7 @@ The workshop will contain coding exercises where you can run R code to generate 
     * [heatmap-cluster.html](http://htmlpreview.github.io/?https://github.com/tinyheero/R-Heatmaps/blob/master/heatmap-cluster.html): The final output of `heatmap-cluster.Rmd`.
     * data: Folder containing the data files required for the `heatmap-cluster.Rmd` file.
 
-		If you are unable to `git clone` this repository, you can also download a packaged version of this repository through the [releases link (at the top)](https://github.com/tinyheero/R-Heatmaps/releases). Please contact me if you are having trouble with either step.
+    If you are unable to `git clone` this repository, you can also download a packaged version of this repository through the [releases link (at the top)](https://github.com/tinyheero/R-Heatmaps/releases). Please contact me if you are having trouble with either step.
 
 2. Install [Rstudio](https://www.rstudio.com/) (if you haven't already).
 3. Inside of Rstudio, make sure you install the following R packages:
