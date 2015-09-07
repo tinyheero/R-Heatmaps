@@ -27,7 +27,7 @@ mat %>%
   kable
 ```
 
-Your first intuition may be whether there is anything interesting in this matrix/table?  It's not immediately obvious which values in the matrix may be outliers/extremes. But if we convert this matrix into graphical representation:
+Your first intuition may be whether there is anything interesting in this matrix/table?  It's not immediately obvious which values in the matrix may be outliers/extremes. But if we convert this matrix into a graphical representation:
 
 ```{r}
 # mat[5:1] is done to make the heatmap output in the same order as the table 
@@ -39,22 +39,29 @@ Each cell in the matrix has now been converted into a different color. Now you c
 
 This example demonstrates the utility of heatmaps which are graphical representations of individual values by different colors. You can find examples of heatmaps in various fields ([Wikipedia has numerous example](https://en.wikipedia.org/wiki/Heat_map#Examples)). 
 
-> It's important to note that a heatmap does not have in a "matrix/table" form
+> It's important to note that a heatmap does not have to be in a "matrix/table" form
 
 For instance, [Wikipedia has an example of a "Choropleth heatmap"](https://commons.wikimedia.org/wiki/File%3A2012_US_Senate_election_in_Massachusetts_results_by_municipality.svg).
 
 ![Wikipedia Example of Choropleth Heatmap](https://upload.wikimedia.org/wikipedia/commons/2/28/2012_US_Senate_election_in_Massachusetts_results_by_municipality.svg "Wikipedia Example of Choropleth Heatmap")
 
-Here the different regions on the map are represented with different colors to indicate how the votes are distributed between the two candidates. **This is also considered a heatmap** and provides a nice graphical representation of which candidate in doing better in certain regions. Without a heatmap to represent such data, it would be difficult to see such patterns.
+Here the different regions on the map are represented with different colors to indicate how the votes are distributed between the two candidates. **This is also considered a heatmap** and provides a nice graphical representation of which candidate is doing better in certain regions. Without a heatmap to represent such data, it would be difficult to see such patterns.
 
 ## Generating Heatmaps from Matrix Data in R
 
-Now that you know what heatmaps are, let's see how we can generate these heatmaps in R where the data is in matrix form. Let's use the same matrix `mat` from the beginning. The easiest way to generate a heatmap in R is to use the `image` function:
+Now that you know what heatmaps are, let's see how we can generate these heatmaps in R when the data is in matrix form. Let's use the same matrix `mat` from the beginning. 
 
 ```{r}
+set.seed(1)
 mat <- matrix(rnorm(25), 5, 5, 
               dimnames = list(LETTERS[1:5], 1:5))
 
+mat
+```
+
+The easiest way to generate a heatmap in R is to use the `image` function:
+
+```{r}
 image(mat)
 ```
 
@@ -88,7 +95,7 @@ If you want to change to use a different color scheme. The `col` parameter allow
 heat.colors(12)
 ```
 
-This basically gives us a color palette which can be used to correspond to the values of the matrix. The `RColorBrewer` R package provides a way to make your color palette:
+This basically gives us a color palette that can be correlated to values in the matrix. The `RColorBrewer` R package provides a way to make your color palette:
 
 ```{r}
 library("RColorBrewer")
@@ -109,7 +116,7 @@ You can now hover over the cells and see the individual values, zoom in and out.
 
 While heatmaps provide a fantastic way to graphical visualize values, but they may not always automatically work right out of the box. I will use an example from the biological sciences to illustrate this. 
 
-Heatmaps are often used in this field to represent "gene expression" matrices. Specifically, the rows represent different biological features (genes) and columns represent different samples. Each cell in the matrix then represents the "expression" of that specific biological feature in a specific patient. Below is an example of one of these matrices and an attempt to generate an heatmap on it:
+Heatmaps are often used in this field to represent "gene expression" matrices. Specifically, the rows represent different biological features (genes) and columns represent different samples. Each cell in the matrix then represents the "expression" of that specific biological feature in a specific sample. Below is an example of one of these matrices and an attempt to generate an heatmap on it:
 
 > This matrix is from [Lim et al. Comprehensive miRNA sequence analysis reveals survival differences in diffuse large B-cell lymphoma patients. Genome Biology](http://www.genomebiology.com/2015/16/1/18). 2015.
 
@@ -121,9 +128,10 @@ d3heatmap(mat.lim, colors = rev(brewer.pal(9, "RdBu")), Rowv = NA, Colv = NA,
           width = 750, height = 1000, yaxis_width = 180)
 ```
 
-That looks really funny hey? What is actually happening? We see a strong "striping" pattern. Let's take a look at expression data we are working with. 
+That looks really funny hey? What is actually happening? We see a strong "striping" pattern occurring across the rows. To gain some insight into the issue, we can take a look at distribution of expression feature we are working with.
 
 ```{r message = FALSE, fig.width = 10}
+library("dplyr")
 library("reshape2")
 library("ggplot2")
 
@@ -147,37 +155,37 @@ mira.highest <- mat.lim %>%
 	as.character
 ```
 
-The `r mira.highest` is the most highly expressed feature in the dataset. Can you identify which row in above heatmap it is (red means high expression)?  It should be one of the rows that is basically almost all red. So how do we get around this? This is where scaling comes in. 
+The `r mira.highest` is the most highly expressed feature in the dataset. Can you identify which row in the above heatmap it is (red means high expression)?  It should be one of the rows that is basically almost all red. So how do we get around this? This is where scaling comes in. 
 
-What we really want to do is to put every row onto the same scale. Right now the range of each row is a function of its expression level. What we can do is perform what is called Z-score normalization. Specifically:
+What we really want to do is to put every row onto the same scale. Right now the range of each row is a function of the features expression level. What we can do is perform what is called Z-score normalization. Specifically:
 
 $$ z = \frac{x - \mu}{\sigma} $$
 
-Where by each value in a row, $x$, is subtracted by the row mean, $\mu$, and then divided by standard deviation $\sigma$. This effectively converts each value in a z-score and also places all rows onto the same scale. The `d3heatmap` function provides the ability to do a z-score row normalization by using the `scale = "row"`:
+Where each value in a row, $x$, is subtracted by the row mean, $\mu$, and then divided by standard deviation $\sigma$. This effectively converts each value into a z-score and places all rows onto the same scale. The `d3heatmap` function provides the ability to do a z-score row normalization by using the `scale = "row"`:
 
 ```{r}
 d3heatmap(mat.lim, colors = rev(brewer.pal(9, "RdBu")), Rowv = NA, Colv = NA,
           width = 750, height = 1000, yaxis_width = 180, scale = "row")
 ```
 
-This looks a bit better. We no longer have the "stripe" patterns anymore. 
+This looks a bit better. We no longer have the "stripe" patterns in the rows anymore. 
 
 ## Heatmap Clustering
 
-We've improved things a bit, but now what we see are columns/samples that have similar patterns. It would be interested to actually group these samples together. This is where the concept of clustering comes in. Clustering is essentially a machine learning technique to aims to "group" together (i.e. cluster) similar things. 
+We've improved things a bit, but now what we see are columns/samples that have similar patterns. It would be interested to actually group these samples together. This is where the concept of clustering comes in. Clustering is a machine learning technique that aims to "group" together (i.e. cluster) similar things. 
 
-The `d3heatmap` function (and `heatmap`) actually performs the clustering automatically for you. In the previous section, I had turned it off using `Rowv = NA` and `Colv = NA` demonstrates only the heatmap component of the function. Let's see what happens if we enable clustering following normalization.
+The `d3heatmap` function (and `heatmap`) actually performs the clustering automatically for you for both rows and columns. In the previous section, I had turned it off using `Rowv = NA` and `Colv = NA` to demonstrate only the heatmap component of the function. Let's see what happens if we enable clustering following normalization.
 
 ```{r}
-d3heatmap(mat.lim, scale = "row", colors = rev(brewer.pal(9, "RdBu")), 
+d3heatmap(mat.lim, scale = "row", Rowv = NA, colors = rev(brewer.pal(9, "RdBu")), 
           width = 750, height = 1000, yaxis_width = 180)
 ```
 
-This is a nice final output that you often see in biological papers. We can clearly see two "clusters" as indicated by the dendrogram/tree on the top. The samples on the left cluster demonstrates higher expression (red) while the samples in the right cluster exhibit lower expression for these features (blue) In fact, this actually makes perfect sense because the samples on the side of the dendrogram is a completely different set of biological samples from the right. 
+This is a nice final output that you often see in biological papers. We can clearly see two "clusters" as indicated by the dendrogram/tree on the top. The samples on the left cluster demonstrates higher expression (red) while the samples in the right cluster exhibit lower expression for these features (blue). In fact, this actually makes perfect sense because the samples on the side of the dendrogram is a completely different set of biological samples from the right. 
 
 ## Conclusions
 
-I hope this tutorial has helped you understand what Heatmaps are. In addition to generating heatmaps, you should also understand the importance of normalization and clustering of data to produce the final outputs you see in biological science papers. This is just the tip of the iceberg though. Some further areas of interest in generating heatmaps may be:
+I hope this tutorial has helped you understand what heatmaps are. In addition to generating heatmaps, you should also understand the importance of normalization and clustering of data to produce the final outputs you see in biological science papers. This is just the tip of the iceberg though. Some further areas of interest in generating heatmaps may be:
 
 * [Exploring different forms of clustering](http://stackoverflow.com/questions/6806762/setting-distance-matrix-and-clustering-methods-in-heatmap-2)
 * [Extracting the dendrograms](http://seqanswers.com/forums/showthread.php?t=32279)
