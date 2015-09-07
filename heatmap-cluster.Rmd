@@ -1,15 +1,15 @@
 ---
-title: "Visualization of Gene Expression Data using Heatmaps in R"
+title: "Generating Heatmaps in R"
 author: "Fong Chun Chan"
 date: "August 25, 2015"
 output: html_document
 ---
 
-## Overall Objectives of this Post
+## Objectives 
 
-* Describe what heatmaps are
-* Generate heatmaps from Matrix Data
-* Describe the connection between heatmaps/clustering 
+* Learn what heatmaps are
+* Learn how to generate a heatmap in R
+* Learn the importance of scaling and clustering in heatmap generation
 
 ## What are Heatmaps?
 
@@ -52,6 +52,9 @@ Here the different regions on the map are represented with different colors to i
 Now that you know what heatmaps are, let's see how we can generate these heatmaps in R where the data is in matrix form. Let's use the same matrix `mat` from the beginning. The easiest way to generate a heatmap in R is to use the `image` function:
 
 ```{r}
+mat <- matrix(rnorm(25), 5, 5, 
+              dimnames = list(LETTERS[1:5], 1:5))
+
 image(mat)
 ```
 
@@ -102,37 +105,23 @@ d3heatmap(mat, Rowv = NA, Colv = NA, colors = heat.colors(12))
 
 You can now hover over the cells and see the individual values, zoom in and out. The function also no longer does the row re-ordering so we don't need to do that hack to maintain the initial ordering. 
 
-## Heatmap and Clustering
+## Heatmap Normalization
 
-While heatmaps provide a fantastic way to graphical visualize values, they don't provide the immediate capacity to allow you to answer questions such as where certain samples/rows are similar. This is where the concept of clustering comes in. Clustering is essentially a machine learning technique to aims to "group" together (i.e. cluster) similar things. To see how heatmap and clustering is related, I will use an example from the biological sciences. Heatmaps are often used in this field to represent "gene expression" matrices. Specifically, the rows represent different genes and columns represent different samples. Each cell in the matrix then represents the expression of that specific gene in a specific patient. For the sake of this post, we will refer to the genes as features. You will often see final products like this:
+While heatmaps provide a fantastic way to graphical visualize values, but they may not always automatically work right out of the box. I will use an example from the biological sciences to illustrate this. 
+
+Heatmaps are often used in this field to represent "gene expression" matrices. Specifically, the rows represent different biological features (genes) and columns represent different samples. Each cell in the matrix then represents the "expression" of that specific biological feature in a specific patient. Below is an example of one of these matrices and an attempt to generate an heatmap on it:
+
+> This matrix is from [Lim et al. Comprehensive miRNA sequence analysis reveals survival differences in diffuse large B-cell lymphoma patients. Genome Biology](http://www.genomebiology.com/2015/16/1/18). 2015.
 
 ```{r}
-mat.file <- "mirna-normalized-expression-subset-lim-2015.txt"
+mat.file <- "data/mirna-normalized-expression-subset-lim-2015.txt"
 mat.lim <- as.matrix(read.table(mat.file, sep = "\t"))
 
-d3heatmap(mat.lim,
-					scale = "row", 
-					colors = rev(brewer.pal(9, "RdBu")),
-					width = 750, 
-					height = 1000,
-					yaxis_width = 180)
+d3heatmap(mat.lim, colors = rev(brewer.pal(9, "RdBu")), Rowv = NA, Colv = NA,
+          width = 750, height = 1000, yaxis_width = 180)
 ```
 
-This is a nice final output. We can clearly see two "clusters" as indicated by the dendrogram/tree on the top. The samples on the left cluster demonstrates higher expression (red) while the samples in the right cluster exhibit lower expression for these features (blue) (*Technically these are microRNAs and so it is incorrect to refer to them as gene expression. This is why for the sake of this post, we will refer to them as features*)
-
-The `d3heatmap` function actually performs the clustering automatically for you. In the previous section, I had turned it off to demonstrates only the heatmap component. Also, I've added `scale = "row"` which performs row normalization which has an important effect in the visualization. Let's see what happens if you were to just generate the heatmap without any clustering (both on the row and column level using `Rowv = NA` and `Colv = NA` and any scaling):
-
-```{r}
-d3heatmap(mat.lim,
-					colors = rev(brewer.pal(9, "RdBu")),
-					Rowv = NA, 
-					Colv = NA,
-					width = 750, 
-					height = 1000, 
-					yaxis_width = 180)
-```
-
-That looks really funny hey? What is actually happening? Let's take a look at expression data we are working with. 
+That looks really funny hey? What is actually happening? We see a strong "striping" pattern. Let's take a look at expression data we are working with. 
 
 ```{r message = FALSE, fig.width = 10}
 library("reshape2")
@@ -145,7 +134,7 @@ mat.lim %>%
 	theme(axis.text.x = element_text(angle = 90, vjust = 0.5))
 ```
 
-The boxplot above shows the distribution of expression values for each gene across the samples. Immediately, certain features are much more highly expressed in all samples compared to other features. And similarly some features are much more lowly expressed than all other features. What's basically happening is that the **between-feature differences** are much greater than the between sample differences. A highly expressed feature will appear a row of all the same colors. For instance, 
+The boxplot above shows the distribution of expression values for each feature across the samples. Immediately, certain features are much more highly expressed in all samples compared to other features. And similarly some features are much more lowly expressed than all other features. What's basically happening is that the **between-feature differences** are much greater than the between sample differences. A highly expressed feature will appear a row of all the same colors. For instance, 
 
 ```{r}
 mira.highest <- mat.lim %>%
@@ -158,120 +147,46 @@ mira.highest <- mat.lim %>%
 	as.character
 ```
 
-The `r mira.highest` is the most highly expressed feature in the dataset. Can you identify which row in above heatmap it is (red means high expression)? It should be one of the rows that is basically almost all red. So how do we get around this? This is where scaling comes in
+The `r mira.highest` is the most highly expressed feature in the dataset. Can you identify which row in above heatmap it is (red means high expression)?  It should be one of the rows that is basically almost all red. So how do we get around this? This is where scaling comes in. 
+
+What we really want to do is to put every row onto the same scale. Right now the range of each row is a function of its expression level. What we can do is perform what is called Z-score normalization. Specifically:
+
+$$ z = \frac{x - \mu}{\sigma} $$
+
+Where by each value in a row, $x$, is subtracted by the row mean, $\mu$, and then divided by standard deviation $\sigma$. This effectively converts each value in a z-score and also places all rows onto the same scale. The `d3heatmap` function provides the ability to do a z-score row normalization by using the `scale = "row"`:
 
 ```{r}
-# read.matrix(
-# 
-# read_load_mat
-# 
-# mat.lim[mat.lim < 1] <- 1
-# mat.lim.log2 <- log2(mat.lim)
-# 
-# mirna <- de.df %>%
-# 	filter(miRNA %in% rownames(mat.lim)) %>% 
-# 	arrange(log2_fold_change) %>%
-# 	slice(1:100) %>%
-# 	.$miRNA
-# 	
-# # mat.lim.log2 %>%
-# # 	melt %>%
-# # 	group_by(Var1) %>%
-# # 	summarize(test = var(value)) %>%
-# # 	
-# # 
-# CB.samples <- c("MX0411_GTAGCC", "MX0411_TACAAG", "MX0411_TCAAGT", "MX0411_TGCTTT", "MX0781_AGATGT", "MX0781_CTGGGT", "MX0781_GCCGGT", "MX0781_TATCGT", "MX0781_GAGAGT", "MX0781_ATCAGT", "MX0781_TCTTCT", "MX0781_CTATCT", "MX0781_GATGCT", "MX0781_AGCGCT", "MX0781_CGGCCT", "MX0781_AATTAT", "MX0781_CCGTAT", "MX0781_TAGGAT", "MX0781_GTTTGT")
-# DLBCL.samples <- colnames(mat.lim)[1:19]
-# 
-# #mat.lim.log2[mirna[1:100], c(DLBCL.samples, CB.samples)
-# #mat.lim.log2[mirna, c(DLBCL.samples, CB.samples)
-# 
-# colnames(mat.lim)
-# 
+d3heatmap(mat.lim, colors = rev(brewer.pal(9, "RdBu")), Rowv = NA, Colv = NA,
+          width = 750, height = 1000, yaxis_width = 180, scale = "row")
 ```
 
-One of the most common techniques to visualize matrix data is to use heatmaps which represent the individual values of a cell by different colors. Doing this, allows for the immediate contrast between different cells and if clustering is performed will allow users to easily distinguish between different columns and rows. It is used in a variety of different fields, and  For instance, let's take a look at this figure:
+This looks a bit better. We no longer have the "stripe" patterns anymore. 
 
+## Heatmap Clustering
 
-Here the rows represent different genes and the columns represent different lymphoma patients. Each cell represents the expression of a gene in a particular patient. The color gradient indicates how the different cells are encoded with green representing smaller values and red representing larger values. Because the data is clustered, we can immediately see patterns in the data. For instance, the patients on the right have . 
+We've improved things a bit, but now what we see are columns/samples that have similar patterns. It would be interested to actually group these samples together. This is where the concept of clustering comes in. Clustering is essentially a machine learning technique to aims to "group" together (i.e. cluster) similar things. 
 
-In R, several functions provide the ability to generate these heatmaps. For instance,
-
-1. heatmap: This is a base function
-1. heatmap.2: This is a function from the package gplots. 
-1. heatmap.plus: 
-1. d3heatmap: From the d3heatmaps package, this function is very similar to the base heatmap function. But it leverages off [D3](http://d3js.org/) to provide an interactive heatmap. 
-
-All these functions provide the capacity to cluster the data and generate the heatmap. If you are only interested in generating a heatmap, then you can do that with the image() function or even use [ggplot](https://learnr.wordpress.com/2010/01/26/ggplot2-quick-heatmap-plotting/).
-
-In this post, we will use the new d3heatmaps R package to generate heatmaps on gene expression from lymphoma patients. Although, the principles and code can easily be extended to other fields. 
-
-Let's start by load
+The `d3heatmap` function (and `heatmap`) actually performs the clustering automatically for you. In the previous section, I had turned it off using `Rowv = NA` and `Colv = NA` demonstrates only the heatmap component of the function. Let's see what happens if we enable clustering following normalization.
 
 ```{r}
-# library("readr")
-# library("dplyr")
-# library("reshape2")
-# library("d3heatmap")
-# library("tinyutils")
-# 
-# #----------
-# # Loading Clinical Data
-# #----------
-# clinical.data.df <- read_tsv("~/Desktop/clinical-data.tsv")
-# clinical.data.df[clinical.data.df == ""] <- NA
-# 
-# abc.samples <- clinical.data.df %>%
-#   filter(RNA_seq_COO == "ABC") %>%
-#   .$miRNA_seq_ID
-# 
-# gcb.samples <- clinical.data.df %>%
-#   filter(RNA_seq_COO == "GCB") %>%
-#   .$miRNA_seq_ID
-# 
-# samples <- c(abc.samples, gcb.samples)
-# 
-# #---------
-# # Loading Expression Data
-# #---------
-# gene.exprs.df <- read_tsv("assets/mirna-expression-Lim-et-al-2015.txt")
-# gene.exprs.mat <- as.matrix(gene.exprs.df[, -1])
-# rownames(gene.exprs.mat) <- gene.exprs.df[[1]]
-# 
-# # Normalize Expression Data
-# sample.total.reads <- colSums(gene.exprs.mat)
-# gene.exprs.mat.normalized <- 
-#   (gene.exprs.mat / sample.total.reads) * 1e6
-# gene.exprs.mat.normalized[gene.exprs.mat.normalized < 1] <- 1
-# gene.exprs.mat.normalized.log2 <- log2(gene.exprs.mat.normalized)
-# 
-# top.mirna <- c("hsa-mir-3150b", "hsa-mir-129", "hsa-mir-155", "hsa-mir-222", 
-#                "hsa-mir-148a", "hsa-mir-3934", "hsa-mir-28")
-#  
-# #---------
-# # Calculate Fold Change Between ABC and GCB Samples
-# #---------
-# # abc.samples.gene.mean <- gene.exprs.mat.normalized.log2[, abc.samples] %>%
-# #   rowMeans
-# # gcb.samples.gene.mean <- gene.exprs.mat.normalized.log2[, gcb.samples] %>%
-# #   rowMeans
-# # 
-# # fc <- abc.samples.gene.mean - gcb.samples.gene.mean
-# # fc.df <- data_frame(mirnaID = names(fc), fc = unname(fc)) %>%
-# #   arrange(desc(fc))
-# # 
-# # top.mirna <- fc.df %>%
-# #   slice(1:50) %>%
-# #   .$mirnaID
-# 
-# gene.exprs.mat.normalized.log2.z <- 
-#   format_mat(gene.exprs.mat.normalized.log2, norm.method = "z")
-# gene.exprs.mat.normalized.log2.z[gene.exprs.mat.normalized.log2.z < -2] <- -2
-# gene.exprs.mat.normalized.log2.z[gene.exprs.mat.normalized.log2.z > 2] <- 2
-# 
-# hc.cols <- hclust(dist(t(gene.exprs.mat.normalized.log2.z[top.mirna, samples])), method = "ward.D2")
-# 
-# d3heatmap(gene.exprs.mat.normalized.log2.z[top.mirna, samples], colors = "Spectral", Colv = as.dendrogram(hc.cols))
+d3heatmap(mat.lim, scale = "row", colors = rev(brewer.pal(9, "RdBu")), 
+          width = 750, height = 1000, yaxis_width = 180)
 ```
 
-When profiling the transcriptome of tumou
+This is a nice final output that you often see in biological papers. We can clearly see two "clusters" as indicated by the dendrogram/tree on the top. The samples on the left cluster demonstrates higher expression (red) while the samples in the right cluster exhibit lower expression for these features (blue) In fact, this actually makes perfect sense because the samples on the side of the dendrogram is a completely different set of biological samples from the right. 
+
+## Conclusions
+
+I hope this tutorial has helped you understand what Heatmaps are. In addition to generating heatmaps, you should also understand the importance of normalization and clustering of data to produce the final outputs you see in biological science papers. This is just the tip of the iceberg though. Some further areas of interest in generating heatmaps may be:
+
+* [Exploring different forms of clustering](http://stackoverflow.com/questions/6806762/setting-distance-matrix-and-clustering-methods-in-heatmap-2)
+* [Extracting the dendrograms](http://seqanswers.com/forums/showthread.php?t=32279)
+* [Adding annotation tracks for rows and samples](https://www.biostars.org/p/18211/)
+
+## Contact
+
+Feel free to contact me for help regarding the content in this workshop:
+
+email: fongchunchan@gmail.com
+twitter: [https://twitter.com/fongchunchan](https://twitter.com/fongchunchan)
+blog: [http://tinyheero.github.io/](http://tinyheero.github.io/)
