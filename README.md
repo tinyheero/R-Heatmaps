@@ -1,6 +1,6 @@
 # Generating Heatmaps in R Workshop
 
-This is the Github repository for https://github.com/minisciencegirl/studyGroup/issues/47. The official event details are as follows:
+This is the Github repository for the event - https://github.com/minisciencegirl/studyGroup/issues/47. The official event details are as follows:
 
 * Date: September 8, 2015
 * Time: 5:30pm
@@ -18,7 +18,8 @@ The workshop will contain parts where you can run R code to generate some heatma
     
     The repository comes with the following files/folders:
     
-    * R-heatmap-slides.pdf: This is the slide deck for the workshop.
+    * Generating-Heatmaps-in-R.pdf: This is the PDF version of the slidedeck for the workshop.
+    * Generating-Heatmaps-in-R.pptx: This is the powerpoint version of the slidedeck for the workshop.
     * heatmap-cluster.Rmd: This is a Rmarkdown file that contains a tutorial and code on how to generate the images shown in the slide deck
     * data: Folder containing the data files required for the `heatmap-cluster.Rmd` file.
 
