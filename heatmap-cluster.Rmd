@@ -187,6 +187,6 @@ I hope this tutorial has helped you understand what Heatmaps are. In addition to
 
 Feel free to contact me for help regarding the content in this workshop:
 
-email: fongchunchan@gmail.com
-twitter: [https://twitter.com/fongchunchan](https://twitter.com/fongchunchan)
-blog: [http://tinyheero.github.io/](http://tinyheero.github.io/)
+* email: fongchunchan@gmail.com
+* twitter: [https://twitter.com/fongchunchan](https://twitter.com/fongchunchan)
+* blog: [http://tinyheero.github.io/](http://tinyheero.github.io/)

@@ -8,7 +8,7 @@ This is the Github repository for the event - https://github.com/minisciencegirl
 
 # Preparation for the Workshop
 
-The workshop will contain parts where you can run R code to generate some heatmaps. If you are interested in doing this, please bring your laptop to the workshop and do the following preparation steps:
+The workshop will contain coding exercises where you can run R code to generate some heatmaps. If you are interested in doing this, please bring your laptop to the workshop and do the following preparation steps:
 
 1. [git](https://git-scm.com/) clone this repository:
 
