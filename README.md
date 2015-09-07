@@ -18,9 +18,9 @@ The workshop will contain parts where you can run R code to generate some heatma
     
     The repository comes with the following files/folders:
     
-    * Generating-Heatmaps-in-R.pdf: This is the slidedeck for the workshop.
+    * [Generating-Heatmaps-in-R.pdf](https://github.com/tinyheero/R-Heatmaps/blob/master/Generating-Heatmaps-in-R.pdf): This is the slidedeck for the workshop.
     * heatmap-cluster.Rmd: This is an Rmarkdown file that contains a tutorial and code on how to generate the images shown in the slide deck.
-    * heatmap-cluster.html: The final output of `heatmap-cluster.Rmd`.
+    * [heatmap-cluster.html](http://htmlpreview.github.io/?https://github.com/tinyheero/R-Heatmaps/blob/master/heatmap-cluster.html): The final output of `heatmap-cluster.Rmd`.
     * data: Folder containing the data files required for the `heatmap-cluster.Rmd` file.
 
 2. Install [Rstudio](https://www.rstudio.com/) (if you haven't already).
