@@ -18,9 +18,9 @@ The workshop will contain parts where you can run R code to generate some heatma
     
     The repository comes with the following files/folders:
     
-    * Generating-Heatmaps-in-R.pdf: This is the PDF version of the slidedeck for the workshop.
-    * Generating-Heatmaps-in-R.pptx: This is the powerpoint version of the slidedeck for the workshop.
-    * heatmap-cluster.Rmd: This is a Rmarkdown file that contains a tutorial and code on how to generate the images shown in the slide deck
+    * Generating-Heatmaps-in-R.pdf: This is the slidedeck for the workshop.
+    * heatmap-cluster.Rmd: This is an Rmarkdown file that contains a tutorial and code on how to generate the images shown in the slide deck.
+    * heatmap-cluster.html: The final output of `heatmap-cluster.Rmd`.
     * data: Folder containing the data files required for the `heatmap-cluster.Rmd` file.
 
 2. Install [Rstudio](https://www.rstudio.com/) (if you haven't already).
@@ -32,6 +32,12 @@ The workshop will contain parts where you can run R code to generate some heatma
     * [RColorBrewer](https://cran.r-project.org/web/packages/RColorBrewer/index.html)
     * [reshape2](https://cran.r-project.org/web/packages/reshape2/index.html)
     * [ggplot2](https://cran.r-project.org/web/packages/ggplot2/index.html)
+
+    Packages can be installed using the `install.packages` function. For example:
+
+    ```
+    install.packages("dplyr")
+    ```
 
 4. Make sure you can render the `heatmap-cluster.Rmd` file by opening the `heatmap-cluster.Rmd` file in RStudio and then pressing the "Knit HTML" button. If it works, then you should see a separate open window open with a document titled "Generating Heatmaps in R".
 
