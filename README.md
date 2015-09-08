@@ -8,7 +8,7 @@ This is the Github repository for the event - https://github.com/minisciencegirl
 
 # Preparation for the Workshop
 
-The workshop will contain coding exercises where you can run R code to generate some heatmaps. If you are interested in doing this, please bring your laptop to the workshop and do the following preparation steps:
+The workshop will contain coding exercises where you can run R code to generate some heatmaps. If you are interested in doing this, please bring your laptop to the workshop and do the following preparation steps.
 
 1. [git](https://git-scm.com/) clone this repository:
 
@@ -25,7 +25,7 @@ The workshop will contain coding exercises where you can run R code to generate 
 
     If you are unable to `git clone` this repository, you can also download a packaged version of this repository through the [releases link (at the top)](https://github.com/tinyheero/R-Heatmaps/releases). Please contact me if you are having trouble with either step.
 
-2. Install [Rstudio](https://www.rstudio.com/) (if you haven't already).
+2. Install [Rstudio](https://www.rstudio.com/) (if you haven't already). The code was tested to work with RStudio 0.99.484.
 3. Inside of Rstudio, make sure you install the following R packages:
 
     * [dplyr](https://cran.r-project.org/web/packages/dplyr/index.html)
