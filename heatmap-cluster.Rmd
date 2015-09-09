@@ -65,31 +65,31 @@ The easiest way to generate a heatmap in R is to use the `image` function:
 image(mat)
 ```
 
-You might notice how this looks a bit different. Specifically the order of the cells appears to be different. As it turns out, the `image` function transpose the data such that the rows become columns and columns become rows. We can fix this by using the `t` (transpose) function on the matrix before using the `image` function
+You might notice how this looks a bit different. Specifically the order of the cells appears to be different. As it turns out, the `image` function transposes the data such that the rows become columns and columns become rows. We can fix this by using the `t` (transpose) function on the matrix before using the `image` function
 
 ```{r }
 image(t(mat))
 ```
 
-This is better now except the order of the rows seems to be different from the input matrix. Specifically, the `image` function actually flips the ordering of the rows. We can fix this:
+This is better now except the order of the rows seems to be different from the input matrix. Specifically, the `image` function actually reverses the ordering of the rows. We can fix this:
 
 ```{r}
 image(t(mat[nrow(mat):1, ]))
 ```
 
-All we are doing here is reversing the rows before we pass it into the `image` function. Such that when the function reverses it again it will be in the same order as the input (perhaps there is a better solution to this). 
+All we are doing here is reversing the rows before we pass it into the `image` function. Such that when the function reverses it again it will be in the same order as the input. For those who are interested in knowing why the `image` function behaves like this, please [read this discussion](http://stackoverflow.com/questions/10124180/unexpectedly-transposed-flipped-output-from-r-image-function).
 
 This is almost what we want except we have lost all our x and y labels! There is a way around this where you can manually add the labels, but at this point it's better to just introduce the `heatmap` function. The `heatmap` function is available from base R. We can use it like this:
 
 ```{r}
 # mat[5:1] is done to make the heatmap output in the same order as the table 
 # above.
-heatmap(mat[5:1, ], Rowv = NA, Colv = NA, scale = "none")
+heatmap(mat[nrow(mat):1, ], Rowv = NA, Colv = NA, scale = "none")
 ```
 
 This is in fact the same code that I used at the beginning of the post. The `heatmap` function actually calls `t(mat)` to generate the heatmap and thus it will result in the same row re-ordering issue we mentioned already. Hence, why the row re-ordering code is used again. The benefit of this is that we also get the x- and y-labels added automatically for us.  **You may have noticed additional parameters that I have set (Rowv, Colv, scale). I will explain how to use these in the next section**.
 
-If you want to change to use a different color scheme. The `col` parameter allows you (actually belongs to the `image` function) modify this. By default the color scheme is set to `heat.colors(12)`:
+If you want to use a different color scheme, the `col` parameter allows you (actually belongs to the `image` function) modify this. By default the color scheme is set to `heat.colors(12)`:
 
 ```{r}
 heat.colors(12)
@@ -100,17 +100,19 @@ This basically gives us a color palette that can be correlated to values in the 
 ```{r}
 library("RColorBrewer")
 my.palette <- colorRampPalette(c("green", "black", "red"))(n = 12)
-heatmap(mat[5:1, ], Rowv = NA, Colv = NA, scale = "none", col = my.palette)
+heatmap(mat[nrow(mat):1, ], Rowv = NA, Colv = NA, scale = "none", col = my.palette)
 ```
 
-Here we setting a color gradient such as it goes from green -> black -> red which corresponds to low -> mid -> high values. You can play around this to get the exact color scheme you want. In addition to the base `heatmap` function, there have been a handful of R packages that have improved on the base `heatmap` function (e.g. [gplots - heatmap.2](https://cran.r-project.org/web/packages/gplots/index.html), [heatmap.plus](https://cran.r-project.org/web/packages/heatmap.plus/index.html), [d3heatmap](https://cran.r-project.org/web/packages/d3heatmap/index.html)). The newest one (to the best of my knowledge and at the time of this writing) is d3heatmap from RStudio. This package leverages off [D3](http://d3js.org/) to provide an interactive heatmap:
+Here we are setting a color gradient such as it goes from green -> black -> red which corresponds to low -> mid -> high values. You can play around this to get the exact color scheme you want. 
+
+In addition to the base `heatmap` function, there have been a handful of R packages that have improved on the base `heatmap` function (e.g. [gplots - heatmap.2](https://cran.r-project.org/web/packages/gplots/index.html), [heatmap.plus](https://cran.r-project.org/web/packages/heatmap.plus/index.html), [d3heatmap](https://cran.r-project.org/web/packages/d3heatmap/index.html)). The newest one (to the best of my knowledge and at the time of this writing) is d3heatmap from RStudio. This package leverages off [D3](http://d3js.org/) to provide an interactive heatmap:
 
 ```{r}
 library("d3heatmap")
 d3heatmap(mat, Rowv = NA, Colv = NA, colors = heat.colors(12))
 ```
 
-You can now hover over the cells and see the individual values, zoom in and out. The function also no longer does the row re-ordering so we don't need to do that hack to maintain the initial ordering. 
+You can now hover over the cells and see the individual values, zoom in and out. The function also no longer replies on the `image` and thus all the aforementioned issues do not appear when we use the `d3heatmap` function.
 
 ## Heatmap Normalization
 
