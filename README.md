@@ -1,4 +1,4 @@
-# Generating Heatmaps in R Workshop
+# Generating Heatmaps in R - Workshop
 
 This is the Github repository for the event - https://github.com/minisciencegirl/studyGroup/issues/47. The official event details are as follows:
 
