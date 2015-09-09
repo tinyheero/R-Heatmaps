@@ -200,3 +200,9 @@ Feel free to contact me for help regarding the content in this workshop:
 * email: fongchunchan@gmail.com
 * twitter: [https://twitter.com/fongchunchan](https://twitter.com/fongchunchan)
 * blog: [http://tinyheero.github.io/](http://tinyheero.github.io/)
+
+## R Session
+
+```{r}
+sessionInfo()
+```
