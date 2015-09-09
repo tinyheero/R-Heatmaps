@@ -2,7 +2,11 @@
 title: "Generating Heatmaps in R"
 author: "Fong Chun Chan"
 date: "August 25, 2015"
-output: html_document
+output:
+  html_document:
+    keep_md: true
+  md_document: 
+    variant: markdown
 ---
 
 ## Objectives 
@@ -29,7 +33,7 @@ mat %>%
 
 Your first intuition may be whether there is anything interesting in this matrix/table?  It's not immediately obvious which values in the matrix may be outliers/extremes. But if we convert this matrix into a graphical representation:
 
-```{r}
+```{r heatmap_example}
 # mat[5:1] is done to make the heatmap output in the same order as the table 
 # above.
 heatmap(mat[5:1, ], Rowv = NA, Colv = NA, scale = "none")
@@ -50,30 +54,21 @@ Here the different regions on the map are represented with different colors to i
 ## Generating Heatmaps from Matrix Data in R
 
 Now that you know what heatmaps are, let's see how we can generate these heatmaps in R when the data is in matrix form. Let's use the same matrix `mat` from the beginning. 
-
-```{r}
-set.seed(1)
-mat <- matrix(rnorm(25), 5, 5, 
-              dimnames = list(LETTERS[1:5], 1:5))
-
-mat
-```
-
 The easiest way to generate a heatmap in R is to use the `image` function:
 
-```{r}
+```{r mat_image}
 image(mat)
 ```
 
 You might notice how this looks a bit different. Specifically the order of the cells appears to be different. As it turns out, the `image` function transposes the data such that the rows become columns and columns become rows. We can fix this by using the `t` (transpose) function on the matrix before using the `image` function
 
-```{r }
+```{r mat_transpose_image}
 image(t(mat))
 ```
 
 This is better now except the order of the rows seems to be different from the input matrix. Specifically, the `image` function actually reverses the ordering of the rows. We can fix this:
 
-```{r}
+```{r mat_reorder_transpose_image}
 image(t(mat[nrow(mat):1, ]))
 ```
 
@@ -81,7 +76,7 @@ All we are doing here is reversing the rows before we pass it into the `image` f
 
 This is almost what we want except we have lost all our x and y labels! There is a way around this where you can manually add the labels, but at this point it's better to just introduce the `heatmap` function. The `heatmap` function is available from base R. We can use it like this:
 
-```{r}
+```{r heatmap}
 # mat[5:1] is done to make the heatmap output in the same order as the table 
 # above.
 heatmap(mat[nrow(mat):1, ], Rowv = NA, Colv = NA, scale = "none")
@@ -91,13 +86,13 @@ This is in fact the same code that I used at the beginning of the post. The `hea
 
 If you want to use a different color scheme, the `col` parameter allows you (actually belongs to the `image` function) modify this. By default the color scheme is set to `heat.colors(12)`:
 
-```{r}
+```{r heatmap_cols}
 heat.colors(12)
 ```
 
 This basically gives us a color palette that can be correlated to values in the matrix. The `RColorBrewer` R package provides a way to make your color palette:
 
-```{r}
+```{r heatmap_diff_cols}
 library("RColorBrewer")
 my.palette <- colorRampPalette(c("green", "black", "red"))(n = 12)
 heatmap(mat[nrow(mat):1, ], Rowv = NA, Colv = NA, scale = "none", col = my.palette)
@@ -107,7 +102,7 @@ Here we are setting a color gradient such as it goes from green -> black -> red 
 
 In addition to the base `heatmap` function, there have been a handful of R packages that have improved on the base `heatmap` function (e.g. [gplots - heatmap.2](https://cran.r-project.org/web/packages/gplots/index.html), [heatmap.plus](https://cran.r-project.org/web/packages/heatmap.plus/index.html), [d3heatmap](https://cran.r-project.org/web/packages/d3heatmap/index.html)). The newest one (to the best of my knowledge and at the time of this writing) is d3heatmap from RStudio. This package leverages off [D3](http://d3js.org/) to provide an interactive heatmap:
 
-```{r}
+```{r d3heatmap}
 library("d3heatmap")
 d3heatmap(mat, Rowv = NA, Colv = NA, colors = heat.colors(12))
 ```
@@ -122,7 +117,7 @@ Heatmaps are often used in this field to represent "gene expression" matrices. S
 
 > This matrix is from [Lim et al. Comprehensive miRNA sequence analysis reveals survival differences in diffuse large B-cell lymphoma patients. Genome Biology](http://www.genomebiology.com/2015/16/1/18). 2015.
 
-```{r}
+```{r d3heatmap_raw}
 mat.file <- "data/mirna-normalized-expression-subset-lim-2015.txt"
 mat.lim <- as.matrix(read.table(mat.file, sep = "\t"))
 
@@ -132,7 +127,7 @@ d3heatmap(mat.lim, colors = rev(brewer.pal(9, "RdBu")), Rowv = NA, Colv = NA,
 
 That looks really funny hey? What is actually happening? We see a strong "striping" pattern occurring across the rows. To gain some insight into the issue, we can take a look at distribution of expression feature we are working with.
 
-```{r message = FALSE, fig.width = 10}
+```{r feature_distr, message = FALSE, fig.width = 10}
 library("dplyr")
 library("reshape2")
 library("ggplot2")
@@ -146,7 +141,7 @@ mat.lim %>%
 
 The boxplot above shows the distribution of expression values for each feature across the samples. Immediately, certain features are much more highly expressed in all samples compared to other features. And similarly some features are much more lowly expressed than all other features. What's basically happening is that the **between-feature differences** are much greater than the between sample differences. A highly expressed feature will appear a row of all the same colors. For instance, 
 
-```{r}
+```{r feature_highest}
 mira.highest <- mat.lim %>%
 	melt %>%
 	group_by(Var1) %>%
@@ -165,7 +160,7 @@ $$ z = \frac{x - \mu}{\sigma} $$
 
 Where each value in a row, $x$, is subtracted by the row mean, $\mu$, and then divided by standard deviation $\sigma$. This effectively converts each value into a z-score and places all rows onto the same scale. The `d3heatmap` function provides the ability to do a z-score row normalization by using the `scale = "row"`:
 
-```{r}
+```{r d3heatmap_row_norm}
 d3heatmap(mat.lim, colors = rev(brewer.pal(9, "RdBu")), Rowv = NA, Colv = NA,
           width = 750, height = 1000, yaxis_width = 180, scale = "row")
 ```
@@ -178,7 +173,7 @@ We've improved things a bit, but now what we see are columns/samples that have s
 
 The `d3heatmap` function (and `heatmap`) actually performs the clustering automatically for you for both rows and columns. In the previous section, I had turned it off using `Rowv = NA` and `Colv = NA` to demonstrate only the heatmap component of the function. Let's see what happens if we enable clustering following normalization.
 
-```{r}
+```{r d3heatmap_row_norm_cluster}
 d3heatmap(mat.lim, scale = "row", Rowv = NA, colors = rev(brewer.pal(9, "RdBu")), 
           width = 750, height = 1000, yaxis_width = 180)
 ```
@@ -203,6 +198,6 @@ Feel free to contact me for help regarding the content in this workshop:
 
 ## R Session
 
-```{r}
+```{r r_session}
 sessionInfo()
 ```
