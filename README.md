@@ -47,9 +47,9 @@ The workshop will contain coding exercises where you can run R code to generate 
 
 1. Why can't I load the `mat.lim` variable?
 
-    This is likely occurring because the `data/mirna-normalized-expression-subset-lim-2015.txt` file is missing or R can't find the file. If you are using the RStudio to open the `heatmap-cluster.Rmd`, you need to make sure that the working directory is of your R contains both the `heatmap-cluster.Rmd` and `data/mirna-normalized-expression-subset-lim-2015.txt`. Specifically, the text file needs to be in a `data` folder. 
+    This is likely occurring because the `data/mirna-normalized-expression-subset-lim-2015.txt` file is missing or R can't find the file. If you are using the RStudio to open the `heatmap-cluster.Rmd`, you need to make sure that the working directory of your R contains both the `heatmap-cluster.Rmd` and `data/mirna-normalized-expression-subset-lim-2015.txt`. Specifically, the text file needs to be in a `data` folder. 
     
-    The best procedure is `git clone` the repository or downloaded the release package to open `heatmap-cluster.Rmd` in RStudio, then at the top go `Session -> Set Working Directory -> To Source File Location`. 
+    The best procedure is `git clone` the repository or download the release package, open `heatmap-cluster.Rmd` in RStudio, then at the top go `Session -> Set Working Directory -> To Source File Location`. 
 
 # Contact
 
