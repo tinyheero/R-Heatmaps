@@ -186,14 +186,6 @@ I hope this tutorial has helped you understand what heatmaps are and how to gene
 * [Extracting the dendrograms](http://seqanswers.com/forums/showthread.php?t=32279)
 * [Adding annotation tracks for rows and samples](https://www.biostars.org/p/18211/)
 
-## Contact
-
-Feel free to contact me for help regarding the content in this workshop:
-
-* email: fongchunchan@gmail.com
-* twitter: [https://twitter.com/fongchunchan](https://twitter.com/fongchunchan)
-* blog: [http://tinyheero.github.io/](http://tinyheero.github.io/)
-
 ## R Session
 
 ```{r r_session}
