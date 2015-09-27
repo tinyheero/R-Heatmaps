@@ -37,7 +37,7 @@ The workshop will contain coding exercises where you can run R code to generate 
 
     Packages can be installed using the `install.packages` function. For example:
 
-    ```
+    ```{r}
     install.packages("dplyr")
     ```
 
