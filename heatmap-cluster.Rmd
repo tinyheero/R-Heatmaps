@@ -7,74 +7,66 @@ output:
     number_sections: true
 ---
 
-# Objectives 
+With the amount of data being generated, it is becoming increasingly critical to utilize proper visualization techniques to make sense of such data. One popular visualization technique is a heatmap which aims to to encode individual data values with different colors. By using color encodings of individual values, potential patterns in a dataset can be more readily identified since similar colors would present similar values and dissimilar colors would present dissimilar values. 
 
-* Learn what heatmaps are (Section 2)
-* Learn how to generate a heatmap in R (Section 3)
-* Learn the importance of scaling and clustering in heatmap generation (Section 4,5)
+The first uses of heatmaps were applied to 2-dimension data matrices where the individual data values in each cell were encoded with a different color:
 
-# What are Heatmaps?
+```{r, message = FALSE, echo = FALSE, dev = "svg"}
+library("dplyr")
+library("knitr")
 
-Heatmaps are graphical representations of data where specific values are encoded by colours. Let's use an example, from R, to demonstrate what this means. Let's say you were presented with the following 5x5 matrix. 
+opts_chunk$set(fig.path = "heatmap-cluster-figs/")
+set.seed(1)
+
+mat <- matrix(rnorm(25), 5, 5, 
+              dimnames = list(LETTERS[1:5], 1:5))
+```
+
+![Matrix to Heatmap Mappings](images/matrix-heatmap.svg)
+
+Doing this allows viewers to immediately spot potential outliers in the data matrix. For example, we can immediately see the red cells in the heatmap which indicate that the cells (D,5) and (D,3) appear to be outliers in the matrix. Referring back to the matrix confirms this as `r mat["D", 5]` (D,5) and `r mat["D", 3]` (D,3) are the most extreme negative values in the matrix. Likewise, the beige cells (A,3) and (D,1) are associated with the most extreme positive values in the matrix. 
+
+It was soon realized that the concept of representing values as colors did not have to be restricted to just data matrices and could be applied in other contexts. For instance, it is common to see [thematic maps](https://en.wikipedia.org/wiki/Thematic_map) which show patterns over some geographical map (image from Wikipedia):
+
+![Wikipedia Example of Choropleth Heatmap](https://upload.wikimedia.org/wikipedia/commons/2/28/2012_US_Senate_election_in_Massachusetts_results_by_municipality.svg "Wikipedia Example of Choropleth Heatmap")
+
+Here the different regions on the map are represented with different colours to indicate how the votes are distributed between the two candidates. Representing such data as colors allows us to see which candidate is doing better in which regions very easily. 
+
+There are several software implementations for generating heatmap with the [R](https://www.r-project.org/) language being one of them. In this post, we will be learning how to generate a heatmap from a data matrix in R. Additionally, we will discuss the importance of scaling and clustering techniques in heatmap generation and how to perform them.
+
+The following R packages need to be installed in order for the code in this post to work:
+
+* [dplyr](https://cran.r-project.org/web/packages/dplyr/index.html)
+* [RColorBrewer](https://cran.r-project.org/web/packages/RColorBrewer/index.html)
+* [reshape2](https://cran.r-project.org/web/packages/reshape2/index.html)
+* [ggplot2](https://cran.r-project.org/web/packages/ggplot2/index.html)
+* [d3heatmap](https://cran.r-project.org/web/packages/d3heatmap/index.html)
+
+# Generating a Heatmap from a Data Matrix in R
+
+Let's first generate a 5x5 data matrix and save it as the `mat` variable:
 
 ```{r, message = FALSE}
 library("dplyr")
 library("knitr")
-set.seed(1)
 
-opts_chunk$set(fig.path = "heatmap-cluster-figs/")
+set.seed(1)
 
 mat <- matrix(rnorm(25), 5, 5, 
               dimnames = list(LETTERS[1:5], 1:5))
+
 mat %>%
   as.data.frame %>%
   kable
 ```
 
-Your first intuition may be whether there is anything interesting in this matrix/table?  It's not immediately obvious which values in the matrix may be outliers/extremes. But if we graphically represent this matrix:
-
-```{r heatmap_example, dev = "svg"}
-# mat[5:1] is done to make the heatmap output in the same order as the table 
-# above. More on this below.
-heatmap(mat[5:1, ], Rowv = NA, Colv = NA, scale = "none")
-```
-
-What has happened is that each cell in the matrix has now been converted into a different colour according to this colour gradient:
-
-```{r, fig.height = 2}
-col.ramp <- heat.colors(12)
-col.levels <- seq(min(mat), max(mat), length = length(col.ramp))
-image(col.levels, 1,
-      matrix(data = col.levels, nrow = length(col.levels), ncol = 1), 
-      col = col.ramp, xlab = "", ylab ="", yaxt = "n")
-```
-
-This graphical representation of the matrix is called a heatmap. By using a heatmap, it should be much easier to visualize outliers. For instance, if we associate the most extreme values of the heatmap with the original matrix values:
-
-![Matrix to Heatmap Mappings](images/matrix-heatmap.svg)
-
-We can immediately see the red cells in the heatmap which indicate that the cells (D,5) and (D,3) appear to be outliers in the matrix. Referring back to the matrix confirms this as `r mat["D", 5]` (D,5) and `r mat["D", 3]` (D,3) are the most extreme negative values in the matrix. Likewise, the beige cells (A,3) and (D,1) are associated with the most extreme positive values in the matrix. 
-
-This example demonstrates the utility of heatmaps in discovering extreme values. You can find examples of heatmaps in various fields ([Wikipedia has numerous example](https://en.wikipedia.org/wiki/Heat_map#Examples)). 
-
-> It's important to note that a heatmap does not have to be in a "matrix/table" form
-
-For instance, [Wikipedia has an example of a "Choropleth heatmap"](https://commons.wikimedia.org/wiki/File%3A2012_US_Senate_election_in_Massachusetts_results_by_municipality.svg).
-
-![Wikipedia Example of Choropleth Heatmap](https://upload.wikimedia.org/wikipedia/commons/2/28/2012_US_Senate_election_in_Massachusetts_results_by_municipality.svg "Wikipedia Example of Choropleth Heatmap")
-
-Here the different regions on the map are represented with different colours to indicate how the votes are distributed between the two candidates. **This is also considered a heatmap** and provides a nice graphical representation of which candidate is doing better in certain regions. Without a heatmap to represent such data, it would be difficult to see such patterns. In the next section, we will look at how to generate such heatmaps in R.
-
-# Generating Heatmaps from Matrix Data in R
-
-Now that you know what heatmaps are, let's see how we can generate these heatmaps in R when the data is in matrix form. Let's use the same matrix `mat` from the beginning. 
-The easiest way to generate a heatmap in R is to use the `image` function:
+The easiest way to generate a heatmap from this data matrix in R is to use the `image` function:
 
 ```{r mat_image}
 image(mat)
 ```
 
-You might notice how this looks a bit different from the heatmap at the beginning the post. Specifically the order of the individual cells appears to be different. As it turns out, the `image` function transposes the data such that the rows become columns and columns become rows. We can fix this by using the `t` (transpose) function on the matrix before using the `image` function
+You might notice how the values in the data matrix do not exactly match up with the heatmap Specifically the order of the individual cells appears to be different. As it turns out, the `image` function transposes the data such that the rows become columns and columns become rows. We can fix this by using the `t` (transpose) function on the matrix before using the `image` function
 
 ```{r mat_transpose_image}
 image(t(mat))
