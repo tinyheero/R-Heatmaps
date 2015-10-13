@@ -41,7 +41,7 @@ The workshop will contain coding exercises where you can run R code to generate 
     install.packages("dplyr")
     ```
 
-4. Make sure you can render the `heatmap-cluster.Rmd` file by opening the `heatmap-cluster.Rmd` file in RStudio and then pressing the "Knit HTML" button. If it works, then you should see a separate open window open with a document titled "Generating Heatmaps in R".
+4. Make sure you can render the `heatmap-cluster.Rmd` file by opening the `heatmap-cluster.Rmd` file in RStudio and then pressing the "Knit HTML" button. If it works, then you should see a separate window open with a document titled "Generating Heatmaps in R".
 
 # FAQ
 
