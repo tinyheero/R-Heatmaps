@@ -9,7 +9,7 @@ output:
 
 With the amount of data being generated, it is becoming increasingly critical to utilize proper visualization techniques to make sense of such data. One popular visualization technique is a heatmap which aims to to encode individual data values with different colors. By using color encodings of individual values, potential patterns in a dataset can be more readily identified since similar colors would present similar values and dissimilar colors would present dissimilar values. 
 
-The first uses of heatmaps were applied to 2-dimension data matrices where the individual data values in each cell were encoded with a different color:
+The first uses of heatmaps were for 2-dimensional data matrices where the individual data values in each cell were encoded with a different color:
 
 ```{r, message = FALSE, echo = FALSE, dev = "svg"}
 library("dplyr")
@@ -24,7 +24,7 @@ mat <- matrix(rnorm(25), 5, 5,
 
 ![Matrix to Heatmap Mappings](images/matrix-heatmap.svg)
 
-Doing this allows viewers to immediately spot potential outliers in the data matrix. For example, we can immediately see the red cells in the heatmap which indicate that the cells (D,5) and (D,3) appear to be outliers in the matrix. Referring back to the matrix confirms this as `r mat["D", 5]` (D,5) and `r mat["D", 3]` (D,3) are the most extreme negative values in the matrix. Likewise, the beige cells (A,3) and (D,1) are associated with the most extreme positive values in the matrix. 
+Doing this allowed viewers to immediately spot potential outliers in the data matrix. For example, we can immediately see the red cells in the heatmap which indicate that the cells (D,5) and (D,3) appear to be outliers in the matrix. Referring back to the matrix confirms this as `r mat["D", 5]` (D,5) and `r mat["D", 3]` (D,3) are the most extreme negative values in the matrix. Likewise, the beige cells (A,3) and (D,1) are associated with the most extreme positive values in the matrix. 
 
 It was soon realized that the concept of representing values as colors did not have to be restricted to just data matrices and could be applied in other contexts. For instance, it is common to see [thematic maps](https://en.wikipedia.org/wiki/Thematic_map) which show patterns over some geographical map (image from Wikipedia):
 
@@ -132,7 +132,6 @@ d3heatmap(mat.lim, colors = rev(brewer.pal(9, "RdBu")), Rowv = NA, Colv = NA,
 That looks really funny hey? What is actually happening? We see a strong "striping" pattern occurring across the rows. To gain some insight into the issue, we can take a look at the distribution of the expression values we are working with:
 
 ```{r feature_distr, message = FALSE, fig.width = 10}
-library("dplyr")
 library("reshape2")
 library("ggplot2")
 
@@ -186,7 +185,7 @@ This is a nice final output that you often see in biological papers. We can clea
 
 # Conclusions
 
-I hope this tutorial has helped you understand what heatmaps are and how to generate them in R. You should also now understand the importance of normalization and clustering of data to produce the final outputs you see in biological science papers and other related fields. This is just the tip of the iceberg though. Some further areas of interest in generating heatmaps may be:
+I hope this post has helped you understand what heatmaps are and how to generate them in R. You should also now understand the importance of normalization and clustering of data to produce the final outputs you see in biological science papers and other related fields. This is just the tip of the iceberg though. Some further areas of interest in generating heatmaps may be:
 
 * [Exploring different forms of clustering](http://stackoverflow.com/questions/6806762/setting-distance-matrix-and-clustering-methods-in-heatmap-2)
 * [Extracting the dendrograms](http://seqanswers.com/forums/showthread.php?t=32279)
